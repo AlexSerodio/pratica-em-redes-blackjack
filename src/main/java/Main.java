@@ -1,5 +1,9 @@
 import java.util.List;
 
+import model.Message;
+import model.User;
+import service.RequestService;
+
 public class Main {
 	
 	private static String userAlex = "9534";
