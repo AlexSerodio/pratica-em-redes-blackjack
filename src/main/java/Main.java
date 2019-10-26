@@ -1,5 +1,6 @@
 import java.util.List;
 
+import exceptions.InvalidUserException;
 import model.Message;
 import model.User;
 import service.RequestService;
@@ -13,10 +14,12 @@ public class Main {
 	private static String passwordBarbara = "cbxep";
 	
 	private static List<User> users;
-	private static RequestService rs = new RequestService(userAlex, passwordAlex);
+	private static RequestService rs;
 	
 	
-	public static void main(String args[]) {
+	public static void main(String args[]) throws InvalidUserException {
+		
+		rs = new RequestService(userAlex, passwordAlex);
 	
 		// recupera a lista de usuários a cada 6 segundos, como pedido no enunciado
 		getUsersThread.start();

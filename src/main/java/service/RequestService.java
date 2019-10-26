@@ -1,9 +1,11 @@
 package service;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import enums.RequestParam;
 import enums.RequestType;
+import exceptions.InvalidUserException;
 import model.Card;
 import model.Message;
 import model.Player;
@@ -17,11 +19,18 @@ public class RequestService {
 	private String userId;
 	private String userPassword;
 	
-	public RequestService(String userId, String userPassword) {
+	public RequestService(String userId, String userPassword) throws InvalidUserException {
 		this.userId = userId;
 		this.userPassword = userPassword;
 		tcpService = new TCPService();
 		udpService = new UDPService();
+		
+		if(!validUser())
+			throw new InvalidUserException("Usuário inválido.");
+	}
+	
+	public String getUserId() {
+		return userId;
 	}
 	
 	public Message getMessage() {
@@ -79,9 +88,11 @@ public class RequestService {
 		// formato do retorno: <userid>,<username>,<wins>,<userid>,<username>,<wins>, ...
 		String[] response = tcpService.send(request);
 		
-		for(int i = 0; i < response.length; i += 3)
-			users.add(new User(response[i], response[i+1], response[i+2]));
-				
+		if(response.length >= 3) {
+			for(int i = 0; i < response.length; i += 3)
+				users.add(new User(response[i], response[i+1], response[i+2]));		
+		}
+		
 		return users;
 	}
 	
@@ -96,10 +107,10 @@ public class RequestService {
 		// formato do retorno: <number>,<suit>
 		String[] response = tcpService.send(request);
 		
-		if(response.length < 2)
-			return null;
-		else
+		if(response.length >= 2)
 			return new Card(response[0], response[1]);
+		else
+			return null;
 	}
 	
 	public List<Player> getPlayers() {
@@ -115,10 +126,26 @@ public class RequestService {
 		// formato do retorno: <userid>,<status>,<userid>,<status>, ...
 		String[] response = tcpService.send(request);
 		
-		for(int i = 0; i < response.length; i += 2)
-			players.add(new Player(response[i], response[i+1]));
+		if(response.length >= 2) {
+			for(int i = 0; i < response.length; i += 2)
+				players.add(new Player(response[i], response[i+1]));			
+		}
 				
 		return players;
+	}
+	
+	private boolean validUser() {
+		String request = buildRequest(
+				RequestType.GET, 
+				RequestParam.USERS, 
+				userId, 
+				userPassword);
+		
+		String response = Arrays.toString(tcpService.send(request));
+		
+		if("Usuário inválido".equals(response))
+			return false;
+		return true;
 	}
 	
 	private String buildRequest(String requestType, String requestParam, String... attributes) {
