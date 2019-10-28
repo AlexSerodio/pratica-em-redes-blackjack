@@ -1,49 +1,33 @@
 package service;
+
 import java.io.*;
 import java.net.*;
 
 import enums.Environment;
+import java.nio.charset.Charset;
 
 public class TCPService {
-	
-	private Socket socket;
-	private static final String RESPONSE_SEPARATOR = ":";
-	
-	public TCPService() {
-		try {
-			socket = new Socket(Environment.HOST_ADRESS, Environment.TCP_PORT);
-			// socket.setKeepAlive(true);
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	public String[] send(String input) {
+
+    private static final String RESPONSE_SEPARATOR = ":";
+
+    public String[] send(String input) {
         DataOutputStream dataStream;
-		try {
-			dataStream = new DataOutputStream(socket.getOutputStream());
-			
-			dataStream.write((input + '\n').getBytes());
+        try {
+            Socket socket = new Socket(Environment.HOST_ADRESS, Environment.TCP_PORT);
 
-	        InputStreamReader stream = new InputStreamReader(socket.getInputStream());
-	        BufferedReader rec = new BufferedReader(stream);
-	        String output = rec.readLine();
+            dataStream = new DataOutputStream(socket.getOutputStream());
+            dataStream.write((input + '\n').getBytes());
 
-	        return output.split(RESPONSE_SEPARATOR);
-		} catch (IOException e) {
-			e.printStackTrace();
-			return new String[0];
-		}
-
-        
-	}
-	
-	public void close() throws IOException {
-        if (socket != null) {
-        	socket.close();
-        	socket = null;
+            InputStreamReader stream = new InputStreamReader(socket.getInputStream());
+            BufferedReader rec = new BufferedReader(stream);
+            String output = rec.readLine();
+                
+            socket.close();
+            return output.split(RESPONSE_SEPARATOR);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return new String[0];
         }
+
     }
 }

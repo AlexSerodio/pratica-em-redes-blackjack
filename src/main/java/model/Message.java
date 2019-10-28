@@ -1,17 +1,20 @@
 package model;
+
+import java.nio.charset.Charset;
+
 public class Message {
 
-	public String userId;
-	public String content;
-	
-	public Message(String userId, String content) {
-		this.userId = userId;
-		this.content = content;
-	}
-	
-	@Override
-	public String toString() {
-		return "{ userId: " + userId + ", content: " + content + " }";
-	}
-	
+    public String userId;
+    public String content;
+
+    public Message(String userId, String content) {
+        this.userId = userId;
+        this.content = new String(content.getBytes(), Charset.forName("UTF-8"));
+    }
+
+    @Override
+    public String toString() {
+        return userId + ": " + content;
+    }
+
 }
